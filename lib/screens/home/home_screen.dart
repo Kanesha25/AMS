@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_app/screens/home/spare_parts.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../models/accident_model.dart';
@@ -276,9 +277,16 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          if (index == 1) { // Spare Parts tab
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SparePartsScreen()),
+            );
+          } else {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
         },
         items: [
           BottomNavigationBarItem(
