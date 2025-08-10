@@ -269,7 +269,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         );
                       },
                       child: Text(
-                        'Sign In',
+                        'Login',
                         style: TextStyle(
                           color: Color(0xFF1DA1F2),
                           fontWeight: FontWeight.bold,
@@ -308,9 +308,42 @@ class _SignUpScreenState extends State<SignUpScreen> {
             context,
             MaterialPageRoute(builder: (_) => HomeScreen()),
           );
-        } else {
+          // Show Successfully Signup message
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sign up failed. Please try again.')),
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text('Successfully Signup'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+        } else {
+          // Show Sign up failed message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.remove_circle, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text('Sign up failed. Please try again.'),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           );
         }
       } catch (e) {
