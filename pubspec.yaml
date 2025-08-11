@@ -35,6 +35,7 @@ flutter:
   assets:
     - lib/screens/assets/images/car_accident_bg1.png
     - lib/screens/assets/images/bg.png
+    - lib/screens/assets/images/logo.png
 
   uses-material-design: true
 
