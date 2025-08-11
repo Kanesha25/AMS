@@ -73,7 +73,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -89,90 +89,108 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _filterSpareParts,
-                decoration: InputDecoration(
-                  hintText: 'Start typing here',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 16,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600],
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 15,
-                  ),
-                ),
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('lib/screens/assets/images/bg.png'), // Add your background image here
+                fit: BoxFit.cover,
               ),
             ),
-            SizedBox(height: 30),
-
-            // Spare Parts List
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filteredSpareParts.length,
-                itemBuilder: (context, index) {
-                  final sparePart = _filteredSpareParts[index];
-                  return _buildSparePartCard(sparePart);
-                },
-              ),
-            ),
-
-            // Edit Spare Parts Button
-            Container(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditSparePartsScreen(
-                        spareParts: _allSpareParts,
-                        onSave: (updatedParts) {
-                          setState(() {
-                            _allSpareParts = updatedParts;
-                            _filterSpareParts(_searchController.text);
-                          });
-                        },
-                      ),
-                    ),
-                  );
-                },
-                child: Text(
-                  'Edit Spare Parts',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF1DA1F2),
-                  shape: RoundedRectangleBorder(
+          ),
+          // Semi-transparent overlay
+          Container(
+            color: Colors.white.withOpacity(0.85),
+          ),
+          // Main content
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Search Bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(25),
                   ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _filterSpareParts,
+                    decoration: InputDecoration(
+                      hintText: 'Start typing here',
+                      hintStyle: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.grey[600],
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 15,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                SizedBox(height: 30),
+
+                // Spare Parts List
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _filteredSpareParts.length,
+                    itemBuilder: (context, index) {
+                      final sparePart = _filteredSpareParts[index];
+                      return _buildSparePartCard(sparePart);
+                    },
+                  ),
+                ),
+
+                // Edit Spare Parts Button
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditSparePartsScreen(
+                            spareParts: _allSpareParts,
+                            onSave: (updatedParts) {
+                              setState(() {
+                                _allSpareParts = updatedParts;
+                                _filterSpareParts(_searchController.text);
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Edit Spare Parts',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF1DA1F2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
             ),
-            SizedBox(height: 20),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

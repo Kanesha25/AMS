@@ -57,222 +57,240 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('lib/screens/assets/images/bg.png'), // Add your background image here
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Semi-transparent overlay
+          Container(
+            color: Colors.white.withOpacity(0.85),
+          ),
+          // Main Content
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Clickable Profile Icon with Dropdown
-                  PopupMenuButton<String>(
-                    onSelected: (value) async {
-                      if (value == 'logout') {
-                        await _handleLogout();
-                      } else if (value == 'profile') {
-                        // Handle profile navigation if needed
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        PopupMenuItem<String>(
-                          value: 'logout',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.logout,
-                                color: Colors.red,
-                                size: 20,
+                  // Header
+                  Row(
+                    children: [
+                      // Clickable Profile Icon with Dropdown
+                      PopupMenuButton<String>(
+                        onSelected: (value) async {
+                          if (value == 'logout') {
+                            await _handleLogout();
+                          } else if (value == 'profile') {
+                            // Handle profile navigation if needed
+                            // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            PopupMenuItem<String>(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.logout,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Logout',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 12),
+                            ),
+                          ];
+                        },
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF1DA1F2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                        offset: Offset(0, 55),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 4,
+                      ),
+                      SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hello,',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Text(
+                            _currentUserName ?? 'LOADING...',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                    ],
+                  ),
+                  SizedBox(height: 30),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _showNewAccidentDialog(),
+                          child: Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF1DA1F2),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.car_crash,
+                                    color: Color(0xFF1DA1F2),
+                                    size: 25,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  'New Accident',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      Expanded(
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Color(0xFF1DA1F2),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.people,
+                                  color: Color(0xFF1DA1F2),
+                                  size: 25,
+                                ),
+                              ),
+                              SizedBox(height: 10),
                               Text(
-                                'Logout',
+                                'Customers',
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  color: Colors.white,
                                   fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ];
-                    },
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Color(0xFF1DA1F2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                    offset: Offset(0, 55),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 4,
-                  ),
-                  SizedBox(width: 15),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hello,',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Text(
-                        _currentUserName ?? 'LOADING...',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
                       ),
                     ],
                   ),
-                  Spacer(),
-                ],
-              ),
-              SizedBox(height: 30),
+                  SizedBox(height: 30),
 
-              // Action Buttons
-              Row(
-                children: [
+                  // Summary Section
+                  Text(
+                    'Summary',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 15),
+
+                  // Accident List
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => _showNewAccidentDialog(),
-                      child: Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Color(0xFF1DA1F2),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.car_crash,
-                                color: Color(0xFF1DA1F2),
-                                size: 25,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'New Accident',
+                    child: StreamBuilder<List<AccidentModel>>(
+                      stream: _databaseService.getAccidents(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No accidents reported yet',
                               style: TextStyle(
-                                color: Colors.white,
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 15),
-                  Expanded(
-                    child: Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Color(0xFF1DA1F2),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.people,
-                              color: Color(0xFF1DA1F2),
-                              size: 25,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            'Customers',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            final accident = snapshot.data![index];
+                            return _buildAccidentCard(accident);
+                          },
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 30),
-
-              // Summary Section
-              Text(
-                'Summary',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 15),
-
-              // Accident List
-              Expanded(
-                child: StreamBuilder<List<AccidentModel>>(
-                  stream: _databaseService.getAccidents(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No accidents reported yet',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final accident = snapshot.data![index];
-                        return _buildAccidentCard(accident);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,

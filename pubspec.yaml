@@ -32,7 +32,9 @@ dev_dependencies:
 
 
 flutter:
-
+  assets:
+    - lib/screens/assets/images/car_accident_bg1.png
+    - lib/screens/assets/images/bg.png
 
   uses-material-design: true
 

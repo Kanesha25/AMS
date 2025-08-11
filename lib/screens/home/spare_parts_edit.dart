@@ -96,7 +96,7 @@ class _EditSparePartsScreenState extends State<EditSparePartsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -112,46 +112,64 @@ class _EditSparePartsScreenState extends State<EditSparePartsScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // Editable Spare Parts List
-            Expanded(
-              child: ListView.builder(
-                itemCount: _editableSpareParts.length,
-                itemBuilder: (context, index) {
-                  final sparePart = _editableSpareParts[index];
-                  return _buildEditableSparePartCard(sparePart, index);
-                },
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('lib/screens/assets/images/bg.png'), // Add your background image here
+                fit: BoxFit.cover,
               ),
             ),
+          ),
+          // Semi-transparent overlay
+          Container(
+            color: Colors.white.withOpacity(0.85),
+          ),
+          // Main content
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Editable Spare Parts List
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _editableSpareParts.length,
+                    itemBuilder: (context, index) {
+                      final sparePart = _editableSpareParts[index];
+                      return _buildEditableSparePartCard(sparePart, index);
+                    },
+                  ),
+                ),
 
-            // Save Changes Button
-            Container(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _saveChanges,
-                child: Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                // Save Changes Button
+                Container(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _saveChanges,
+                    child: Text(
+                      'Save Changes',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF1DA1F2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF1DA1F2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
+                SizedBox(height: 20),
+              ],
             ),
-            SizedBox(height: 20),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
