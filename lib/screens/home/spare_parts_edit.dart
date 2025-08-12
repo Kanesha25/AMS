@@ -160,7 +160,7 @@ class _EditSparePartsScreenState extends State<EditSparePartsScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF1DA1F2),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),

@@ -114,7 +114,7 @@ class _LoadingScreenState extends State<LoadingScreen>
       });
 
       // Still navigate after error (you might want to handle this differently)
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 5));
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => AuthWrapper()),
       );
@@ -191,32 +191,6 @@ class _LoadingScreenState extends State<LoadingScreen>
                                     child: Image.asset(
                                       'lib/screens/assets/images/logo.png', // Your logo path
                                       fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        // Fallback to AMS text if image fails to load
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Color(0xFF1DA1F2),
-                                                Color(0xFF2C3E50),
-                                              ],
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              'AMS',
-                                              style: TextStyle(
-                                                fontSize: 32,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                                letterSpacing: 2,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
                                     ),
                                   ),
                                 ),
@@ -282,7 +256,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                     child: Text(
                       'Accident Management System',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF2C3E50),
                         letterSpacing: 1,

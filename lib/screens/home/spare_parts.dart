@@ -113,7 +113,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -181,7 +181,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF1DA1F2),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
