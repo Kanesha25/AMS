@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_app/screens/home/spare_parts.dart';
+import 'package:my_app/screens/customers/customers_screen.dart'; // Add this import
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
 import '../../models/accident_model.dart';
@@ -205,38 +206,46 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(width: 15),
                       Expanded(
-                        child: Container(
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF1DA1F2),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => CustomersScreen()),
+                            );
+                          },
+                          child: Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF1DA1F2),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.people,
+                                    color: Color(0xFF1DA1F2),
+                                    size: 25,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.people,
-                                  color: Color(0xFF1DA1F2),
-                                  size: 25,
+                                SizedBox(height: 10),
+                                Text(
+                                  'Customers',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                'Customers',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
