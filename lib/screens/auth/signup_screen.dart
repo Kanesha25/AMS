@@ -121,7 +121,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: InputDecoration(
-                        hintText: 'Enter your full name',
+                        hintText: 'Enter your name',
                         hintStyle: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 16,
