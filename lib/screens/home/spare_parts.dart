@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/spare_part_model.dart';
+import '../../database/spare_parts_database.dart';
 import 'spare_parts_edit.dart';
-
 
 class SparePartsScreen extends StatefulWidget {
   @override
@@ -10,49 +10,40 @@ class SparePartsScreen extends StatefulWidget {
 
 class _SparePartsScreenState extends State<SparePartsScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final SparePartsDatabase _database = SparePartsDatabase();
   List<SparePart> _allSpareParts = [];
   List<SparePart> _filteredSpareParts = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _initializeSpareParts();
-    _filteredSpareParts = _allSpareParts;
+    _loadSparePartsFromDatabase();
   }
 
-  void _initializeSpareParts() {
-    _allSpareParts = [
-      SparePart(
-        name: 'Left Headlight',
-        minPrice: 50000,
-        maxPrice: 125000,
-      ),
-      SparePart(
-        name: 'Side Mirror',
-        minPrice: 20000,
-        maxPrice: 75000,
-      ),
-      SparePart(
-        name: 'Tail Light',
-        minPrice: 50000,
-        maxPrice: 100000,
-      ),
-      SparePart(
-        name: 'Bonnet',
-        minPrice: 10000,
-        maxPrice: 15000,
-      ),
-      SparePart(
-        name: 'Bumper',
-        minPrice: 70000,
-        maxPrice: 150000,
-      ),
-      SparePart(
-        name: 'Windscreen',
-        minPrice: 100000,
-        maxPrice: 175000,
-      ),
-    ];
+  Future<void> _loadSparePartsFromDatabase() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final spareParts = await _database.getAllSpareParts();
+      setState(() {
+        _allSpareParts = spareParts;
+        _filteredSpareParts = spareParts;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading spare parts: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _filterSpareParts(String query) {
@@ -66,6 +57,11 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
             .toList();
       }
     });
+  }
+
+  Future<void> _refreshData() async {
+    await _loadSparePartsFromDatabase();
+    _filterSpareParts(_searchController.text);
   }
 
   @override
@@ -95,7 +91,7 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('lib/screens/assets/images/bg.png'), // Add your background image here
+                image: AssetImage('lib/screens/assets/images/bg.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -128,6 +124,15 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                         Icons.search,
                         color: Colors.grey[600],
                       ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                        icon: Icon(Icons.clear, color: Colors.grey[600]),
+                        onPressed: () {
+                          _searchController.clear();
+                          _filterSpareParts('');
+                        },
+                      )
+                          : null,
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 20,
@@ -138,14 +143,56 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                 ),
                 SizedBox(height: 30),
 
-                // Spare Parts List
+                // Content based on loading state
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: _filteredSpareParts.length,
-                    itemBuilder: (context, index) {
-                      final sparePart = _filteredSpareParts[index];
-                      return _buildSparePartCard(sparePart);
-                    },
+                  child: _isLoading
+                      ? Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF1DA1F2),
+                      ),
+                    ),
+                  )
+                      : _filteredSpareParts.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'No spare parts found',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Try adjusting your search terms',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : RefreshIndicator(
+                    onRefresh: _refreshData,
+                    color: Color(0xFF1DA1F2),
+                    child: ListView.builder(
+                      itemCount: _filteredSpareParts.length,
+                      itemBuilder: (context, index) {
+                        final sparePart = _filteredSpareParts[index];
+                        return _buildSparePartCard(sparePart);
+                      },
+                    ),
                   ),
                 ),
 
@@ -154,21 +201,25 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => EditSparePartsScreen(
                             spareParts: _allSpareParts,
-                            onSave: (updatedParts) {
-                              setState(() {
-                                _allSpareParts = updatedParts;
-                                _filterSpareParts(_searchController.text);
-                              });
+                            onSave: (updatedParts) async {
+                              await _refreshData();
                             },
                           ),
                         ),
                       );
+
+                      // Refresh data when returning from edit screen
+                      if (result == true) {
+                        await _refreshData();
+                      }
                     },
                     child: Text(
                       'Edit Spare Parts',
@@ -202,6 +253,13 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[300],
         borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,5 +293,11 @@ class _SparePartsScreenState extends State<SparePartsScreen> {
   String _formatPrice(int price) {
     return price.toString().replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
