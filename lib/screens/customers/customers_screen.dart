@@ -91,7 +91,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                   height: 50,
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: TextField(
                     controller: _searchController,
