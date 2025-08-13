@@ -108,7 +108,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     Container(
                       width: double.infinity,
                       child: Text(
-                        'Full Name',
+                        'Name',
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 16,
