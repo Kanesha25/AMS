@@ -8,6 +8,7 @@ import '../../services/database_service.dart';
 import '../../models/accident_model.dart';
 import '../../models/user_model.dart';
 import '../auth/login_screen.dart';
+import '../accidents/new_accident_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -421,57 +422,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showNewAccidentDialog() {
-    final _locationController = TextEditingController();
-    final _descriptionController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Report New Accident'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _locationController,
-                decoration: InputDecoration(
-                  labelText: 'Location',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 15),
-              TextField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _addNewAccident(
-                  _locationController.text,
-                  _descriptionController.text,
-                );
-                Navigator.pop(context);
-              },
-              child: Text('Report'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF1DA1F2),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NewAccidentScreen()),
+    ).then((result) {
+      if (result == true) {
+        // Refresh the accidents list
+        setState(() {});
+      }
+    });
   }
 
   void _addNewAccident(String location, String description) {
