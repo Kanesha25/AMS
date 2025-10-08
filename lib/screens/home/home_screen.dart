@@ -9,6 +9,7 @@ import '../../models/accident_model.dart';
 import '../../models/user_model.dart';
 import '../auth/login_screen.dart';
 import '../accidents/new_accident_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -90,12 +91,34 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (value == 'logout') {
                             await _handleLogout();
                           } else if (value == 'profile') {
-                            // Handle profile navigation if needed
-                            // Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ProfileScreen()),
+                            );
                           }
                         },
                         itemBuilder: (BuildContext context) {
                           return [
+                            PopupMenuItem<String>(
+                              value: 'profile',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.person,
+                                    color: Color(0xFF1DA1F2),
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'My Profile',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             PopupMenuItem<String>(
                               value: 'logout',
                               child: Row(
@@ -309,6 +332,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => SparePartsScreen()),
+            );
+          } else if (index == 2) { // Profile tab
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ProfileScreen()),
             );
           } else {
             setState(() {
