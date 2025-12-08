@@ -9,7 +9,13 @@ import '../../models/accident_model.dart';
 import '../../models/user_model.dart';
 import '../auth/login_screen.dart';
 import '../accidents/new_accident_screen.dart';
+import '../accidents/estimation_report_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../models/customer_model.dart';
+import '../../models/inspector_profile.dart';
+import '../../models/spare_part_model.dart';
+import '../../services/customer_service.dart';
+import '../../database/spare_parts_database.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -19,6 +25,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   final DatabaseService _databaseService = DatabaseService();
+  final CustomerService _customerService = CustomerService();
+  final SparePartsDatabase _sparePartsDatabase = SparePartsDatabase();
   int _selectedIndex = 0;
   String? _currentUserName;
 
@@ -365,14 +373,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAccidentCard(AccidentModel accident) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
+    // Calculate average total cost
+    int? totalAvgCost;
+    if (accident.estimatedParts.isNotEmpty) {
+      totalAvgCost = accident.estimatedParts.fold<int>(
+        0,
+        (sum, part) {
+          final min = (part['min_price'] as num?)?.toInt() ?? 0;
+          final max = (part['max_price'] as num?)?.toInt() ?? 0;
+          return sum + ((min + max) ~/ 2);
+        },
+      );
+    } else if (accident.estimatedMinCost != null &&
+        accident.estimatedMaxCost != null) {
+      totalAvgCost = (accident.estimatedMinCost! + accident.estimatedMaxCost!) ~/ 2;
+    }
+
+    return InkWell(
+      onTap: () => _viewEstimationReport(accident),
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 15),
+        padding: EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -393,11 +420,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  accident.status,
+                  'Completed',
                   style: TextStyle(
-                    color: _getStatusColor(accident.status),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                  color: _getStatusColor('Completed'),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -419,6 +446,38 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.grey[600],
             ),
           ),
+          if (totalAvgCost != null) ...[
+            SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Color(0xFF1DA1F2).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Estimated Total Cost',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    'LKR ${_formatCurrency(totalAvgCost)}',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           SizedBox(height: 8),
           Text(
             _formatDate(accident.timestamp),
@@ -428,14 +487,156 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
+  }
+
+  Future<void> _viewEstimationReport(AccidentModel accident) async {
+    try {
+      // Extract customer name from description
+      // Format: "Customer: [Name], Vehicle: [Number], Model: [Model], Parts: [Parts]"
+      String customerName = '';
+      String vehicleNumber = accident.vehicleNumber;
+      
+      if (accident.description.contains('Customer:')) {
+        final parts = accident.description.split(',');
+        for (var part in parts) {
+          if (part.trim().startsWith('Customer:')) {
+            customerName = part.replaceFirst('Customer:', '').trim();
+            break;
+          }
+        }
+      }
+
+      // Try to find customer by name or vehicle number
+      CustomerModel? customer;
+      try {
+        final customersStream = _customerService.getCustomers();
+        final customers = await customersStream.first;
+        try {
+          customer = customers.firstWhere(
+            (c) => c.fullName == customerName || c.vehicleNumber == vehicleNumber,
+          );
+        } catch (_) {
+          // Customer not found, create a placeholder
+          final nameParts = customerName.split(' ');
+          customer = CustomerModel(
+            id: 'temp',
+            firstName: nameParts.isNotEmpty ? nameParts.first : 'Unknown',
+            lastName: nameParts.length > 1 ? nameParts.skip(1).join(' ') : '',
+            phoneNumber: '-',
+            nic: '-',
+            address: '-',
+            vehicleNumber: vehicleNumber,
+            model: accident.vehicleModel,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+        }
+      } catch (e) {
+        // If error loading customers, create a placeholder
+        final nameParts = customerName.split(' ');
+        customer = CustomerModel(
+          id: 'temp',
+          firstName: nameParts.isNotEmpty ? nameParts.first : 'Unknown',
+          lastName: nameParts.length > 1 ? nameParts.skip(1).join(' ') : '',
+          phoneNumber: '-',
+          nic: '-',
+          address: '-',
+          vehicleNumber: vehicleNumber,
+          model: accident.vehicleModel,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }
+
+      // Load inspector profile from user's profile
+      InspectorProfile? inspectorProfile;
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          if (doc.exists && doc.data() != null) {
+            final userData = doc.data()!;
+            // Use user's name as inspector name
+            final userName = userData['name'] ?? 
+                            '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}'.trim() ??
+                            user.displayName ??
+                            user.email?.split('@')[0] ??
+                            'Inspector';
+            inspectorProfile = InspectorProfile.fromMap(
+              userData,
+              fallbackName: userName,
+              fallbackPhone: userData['phoneNumber'] ?? '',
+            );
+          }
+        }
+      } catch (e) {
+        print('Error loading inspector profile: $e');
+      }
+
+      // Convert estimatedParts to SparePart objects
+      final List<SparePart> estimationParts = [];
+      for (var partMap in accident.estimatedParts) {
+        final name = partMap['name']?.toString() ?? '';
+        final minPrice = (partMap['min_price'] as num?)?.toInt() ?? 0;
+        final maxPrice = (partMap['max_price'] as num?)?.toInt() ?? 0;
+        if (name.isNotEmpty) {
+          estimationParts.add(SparePart(
+            name: name,
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+          ));
+        }
+      }
+
+      // If no parts from estimatedParts, try to load from spare parts database
+      if (estimationParts.isEmpty) {
+        final allParts = await _sparePartsDatabase.getAllSpareParts();
+        for (var partMap in accident.estimatedParts) {
+          final name = partMap['name']?.toString() ?? '';
+          if (name.isNotEmpty) {
+            try {
+              final part = allParts.firstWhere((p) => p.name == name);
+              estimationParts.add(part);
+            } catch (_) {
+              // Part not found, skip
+            }
+          }
+        }
+      }
+
+      if (customer != null) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EstimationReportScreen(
+              accident: accident,
+              customer: customer!,
+              inspectorProfile: inspectorProfile,
+              estimationParts: estimationParts,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading report: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return Colors.orange;
+        return Colors.green;
       case 'in progress':
         return Colors.blue;
       case 'completed':
@@ -447,6 +648,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day}.${date.month.toString().padLeft(2, '0')}.${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')} ${date.hour >= 12 ? 'pm' : 'am'}';
+  }
+
+  String _formatCurrency(num value) {
+    final str = value.toStringAsFixed(0);
+    final reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return str.replaceAllMapped(reg, (match) => '${match[1]},');
   }
 
   void _showNewAccidentDialog() {
@@ -468,7 +675,9 @@ class _HomeScreenState extends State<HomeScreen> {
         location: location,
         description: description,
         timestamp: DateTime.now(),
-        status: 'Pending',
+        status: 'Completed',
+        vehicleNumber: 'N/A',
+        vehicleModel: 'N/A',
       );
 
       _databaseService.addAccident(accident);

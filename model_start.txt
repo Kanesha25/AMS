@@ -1,0 +1,2 @@
+cd D:\my_app
+D:\my_app\.venv\Scripts\python.exe -m uvicorn main:app --reload --port 8000

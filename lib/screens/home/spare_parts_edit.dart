@@ -32,13 +32,15 @@ class _EditSparePartsScreenState extends State<EditSparePartsScreen> {
   void initState() {
     super.initState();
     _editableSpareParts = widget.spareParts
-        .map((part) =>
-        SparePart(
-          id: part.id,
-          name: part.name,
-          minPrice: part.minPrice,
-          maxPrice: part.maxPrice,
-        ))
+        .map(
+          (part) => SparePart(
+            documentId: part.documentId,
+            id: part.id,
+            name: part.name,
+            minPrice: part.minPrice,
+            maxPrice: part.maxPrice,
+          ),
+        )
         .toList();
 
     _filteredSpareParts = _editableSpareParts;
